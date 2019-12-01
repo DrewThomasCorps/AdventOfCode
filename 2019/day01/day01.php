@@ -10,7 +10,7 @@ require_once __DIR__ . "/../helper/FileReader.php";
 $fileReader = new FileReader("day01.txt");
 $data = $fileReader->getData();
 
-function part1($data): int
+function part1(array $data): int
 {
     $totalFuel = 0;
     foreach ($data as $mass) {
@@ -20,7 +20,7 @@ function part1($data): int
     return $totalFuel;
 }
 
-function part2($data): int
+function part2(array $data): int
 {
     $totalFuel = 0;
     foreach ($data as $mass) {
@@ -33,7 +33,7 @@ function part2($data): int
     return $totalFuel;
 }
 
-function getFuel($mass): int
+function getFuel(int $mass): int
 {
     return floor($mass / 3) - 2;
 }

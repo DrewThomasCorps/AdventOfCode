@@ -33,7 +33,7 @@ function part2($data): int
     return $totalFuel;
 }
 
-function getFuel($mass)
+function getFuel($mass): int
 {
     return floor($mass / 3) - 2;
 }

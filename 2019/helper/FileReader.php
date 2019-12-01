@@ -13,10 +13,10 @@ class FileReader
     private bool $hasColumns = false;
     private string $delimiter = ",";
 
-    public function __construct($file, $hasColumns = false, $delimiter = ",")
+    public function __construct(string $file, bool $hasColumns = false, string $delimiter = ",")
     {
         $this->handle = fopen(__DIR__ . "/../files/$file", 'r');
-        $this->hasColumns = false;
+        $this->hasColumns = $hasColumns;
         $this->delimiter = $delimiter;
     }
 

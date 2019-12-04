@@ -9,6 +9,7 @@
 class PasswordChecker
 {
     private string $password;
+    private int $currentMatchCount = 0;
 
     public function __construct(string $password)
     {
@@ -29,6 +30,21 @@ class PasswordChecker
         return true;
     }
 
+    public function containsExactlyOneRepeat(): bool
+    {
+        $integers = str_split($this->password);
+        for ($i = 1; $i < count($integers); $i++) {
+            if ($integers[$i] === $integers[$i - 1] ) {
+                $this->currentMatchCount++;
+            } elseif ($this->currentMatchCount === 1){
+                return true;
+            } else {
+                $this->currentMatchCount = 0;
+            }
+        }
+        return $this->currentMatchCount === 1;
+    }
+
     private function containsDecreasingDigits(): bool
     {
         $integers = str_split($this->password);
@@ -44,7 +60,7 @@ class PasswordChecker
     {
         $integers = str_split($this->password);
         for ($i = 1; $i < count($integers); $i++) {
-            if ($integers[$i] == $integers[$i-1]) {
+            if ($integers[$i] === $integers[$i - 1]) {
                 return true;
             }
         }

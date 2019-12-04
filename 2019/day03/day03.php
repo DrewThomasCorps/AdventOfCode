@@ -15,5 +15,5 @@ $circuit = new Circuit($input);
 $closestIntersection = $circuit->getClosestIntersection();
 $fewestSteps = $circuit->getFewestStepsAtIntersections();
 
-echo "Day 1: Manhattan Distance: {$closestIntersection->getManhattanDistance()}";
-echo "\nDay 2: Fewest Steps: $fewestSteps";
+echo "Part 1: Manhattan Distance: {$closestIntersection->getManhattanDistance()}";
+echo "\nPart 2: Fewest Steps: $fewestSteps";

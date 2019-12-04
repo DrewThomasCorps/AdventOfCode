@@ -11,11 +11,20 @@ $file = fopen(__DIR__ . "/../files/day04.txt", "r");
 [$start, $end] = fgetcsv($file, 0, "-");
 
 $validPasswords = [];
-for ($i = $start; $i <= $end; $i++){
+for ($i = $start; $i <= $end; $i++) {
     $potential = new PasswordChecker($i);
-    if ($potential->isValid()){
+    if ($potential->isValid()) {
         $validPasswords[] = $potential;
     }
 }
 
-echo count($validPasswords);
+echo "Part 1: " . count($validPasswords);
+
+$partTwoPasswords = [];
+foreach ($validPasswords as $validPassword) {
+    if ($validPassword->containsExactlyOneRepeat()) {
+        $partTwoPasswords[] = $validPassword;
+    }
+}
+
+echo "\nPart 2: " . count($partTwoPasswords);

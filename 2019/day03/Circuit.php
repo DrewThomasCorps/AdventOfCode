@@ -21,20 +21,30 @@ class Circuit
     public function getClosestIntersection(): Point
     {
         $intersections = $this->getPathIntersections();
-        foreach ($intersections as $intersection) {
-            echo $intersection->getManhattanDistance() . "\n";
-        }
         usort($intersections,
             fn (Point $a, Point $b) => $a->getManhattanDistance() <=> $b->getManhattanDistance()
         );
         return $intersections[0];
     }
 
+    public function getFewestStepsAtIntersections()
+    {
+        $intersections = $this->getPathIntersections();
+        $fewestSteps = 99999999999999999;
+        foreach ($intersections as $intersection){
+            $a = $this->wires[0]->getPointWithFewestSteps($intersection);
+            $b = $this->wires[1]->getPointWithFewestSteps($intersection);
+            $totalSteps = $a->steps + $b->steps;
+            if ($totalSteps < $fewestSteps) {
+                $fewestSteps = $totalSteps;
+            }
+        }
+        return $fewestSteps;
+    }
+
     private function getPathIntersections()
     {
-        $intersections = array_uintersect($this->wires[0]->points, $this->wires[1]->points,
-            fn (Point $a, Point $b) => $a <=> $b
-        );
+        $intersections = array_intersect($this->wires[0]->points, $this->wires[1]->points,);
         return $intersections;
     }
 

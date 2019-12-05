@@ -44,7 +44,7 @@ class Circuit
 
     private function getPathIntersections()
     {
-        $intersections = array_intersect($this->wires[0]->points, $this->wires[1]->points,);
+        $intersections = array_intersect($this->wires[0]->points, $this->wires[1]->points);
         return $intersections;
     }
 

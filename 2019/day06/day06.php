@@ -15,3 +15,5 @@ $orbits = $fileReader->getData();
 $solarSystem = new SolarSystem();
 $solarSystem->addOrbits($orbits);
 echo "Part 1: " . $solarSystem->getTotalOrbits();
+
+echo "\nPart 2: " . $solarSystem->getOrbitalTransfersBetweenPlanets("SAN", "YOU");

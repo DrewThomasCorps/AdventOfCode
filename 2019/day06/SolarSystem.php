@@ -34,4 +34,34 @@ class SolarSystem
         }
     }
 
+    public function getOrbitalTransfersBetweenPlanets(string $startPlanet, string $endPlanet)
+    {
+        $startPlanet = $this->planets[$startPlanet];
+        $endPlanet = $this->planets[$endPlanet];
+        $potentialParents = $this->findPlanetsWithDescendents($startPlanet, $endPlanet);
+        $startSteps = $this->findStepsToFirstPotentialParent($startPlanet, $potentialParents);
+        $endSteps = $this->findStepsToFirstPotentialParent($endPlanet, $potentialParents);
+        return $endSteps + $startSteps;
+    }
+
+    private function findPlanetsWithDescendents(Planet $startPlanet, Planet $endPlanet): array
+    {
+        return array_filter($this->planets, function (Planet $planet) use ($startPlanet, $endPlanet) {
+            return $planet->hasSatellite($startPlanet) && $planet->hasSatellite($endPlanet);
+        });
+    }
+
+    private function findStepsToFirstPotentialParent(Planet $planet, array $potentialParents): int
+    {
+        $steps = 0;
+        $parent = $planet->parent;
+        while (!in_array($parent, $potentialParents)) {
+            $steps++;
+            $parent = $parent->parent;
+        }
+        return $steps;
+    }
+
+
+
 }

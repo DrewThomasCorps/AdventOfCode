@@ -10,7 +10,7 @@ class Layer
 {
     private int $height;
     private int $width;
-    private array $rows;
+    public array $rows;
 
     public function __construct(string $pixels, int $height, int $width)
     {
@@ -32,12 +32,17 @@ class Layer
     {
         return array_reduce($this->rows, function ($carry, $row) use ($digit) {
             $carry += array_reduce($row, function ($carry, $pixel) use ($digit) {
-                if ((int) $pixel === $digit) {
+                if ((int)$pixel === $digit) {
                     $carry++;
                 }
                 return $carry;
             });
             return $carry;
         });
+    }
+
+    public function getPixelAtPosition($row, $column): string
+    {
+        return $this->rows[$row][$column];
     }
 }

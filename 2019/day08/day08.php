@@ -15,4 +15,5 @@ $ones = $layer->getPixelDigitCount(1);
 $twos = $layer->getPixelDigitCount(2);
 
 echo "Part 1: " . ($ones * $twos) . "\n";
-
+echo "Part 2: \n";
+$image->print();

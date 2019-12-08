@@ -43,4 +43,24 @@ class Image
         return $returnLayer;
     }
 
+    public function print()
+    {
+        for ($heightIndex = 0; $heightIndex < $this->height; $heightIndex++) {
+            for ($widthIndex = 0; $widthIndex < $this->width; $widthIndex++) {
+                echo ($this->getFirstVisiblePixelAtPosition($heightIndex, $widthIndex) === "1" ? "*" : " ") . " ";
+            }
+            echo "\n";
+        }
+    }
+
+    private function getFirstVisiblePixelAtPosition(int $row, int $column): string
+    {
+        foreach ($this->layers as $layer) {
+            $layerPixel = $layer->getPixelAtPosition($row, $column);
+            if ($layerPixel !== "2") {
+                return $layerPixel;
+            }
+        }
+        return " ";
+    }
 }

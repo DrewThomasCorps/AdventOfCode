@@ -14,6 +14,6 @@ $asteroidBelt = new AsteroidBelt($asteroidRows);
 $chosenAsteroidCoordinates = $asteroidBelt->getCoordinatesOfAsteroidWithMostVisibleAsteroids();
 echo "Part 1: " . $asteroidBelt->getVisibleAsteroidsFromCoordinates($chosenAsteroidCoordinates);
 $destroyedAsteroids = $asteroidBelt->destroyAsteroidsFromCoordinates($chosenAsteroidCoordinates);
-//var_dump($destroyedAsteroids);
+var_dump($destroyedAsteroids);
 $twoHundredthAsteroidCoordinates = $destroyedAsteroids[199];
 echo "\nPart 2: " . (($twoHundredthAsteroidCoordinates->x * 100) + $twoHundredthAsteroidCoordinates->y);

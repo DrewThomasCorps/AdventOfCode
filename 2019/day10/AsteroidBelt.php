@@ -8,7 +8,6 @@ require_once __DIR__ . "/Vector.php";
  * Date: 2019-12-10
  * Time: 00:05
  */
-
 class AsteroidBelt
 {
     private const ASTEROID = "#";
@@ -90,13 +89,26 @@ class AsteroidBelt
         sort($possibleAngles);
         while (count($vectors) !== 0) {
             foreach ($possibleAngles as $angle) {
-                foreach ($vectors as $key => $vector) {
-                    if ($vector->angleFromTopClockwise === $angle) {
-                        $destroyedAsteroidCoordinates[] = $vector->endCoordinates;
-                        unset($vectors[$key]);
-                        break;
+                $possibleVectors = array_filter($vectors, function (Vector $vector) use ($angle) {
+                    return $vector->angleFromTopClockwise === $angle;
+                });
+                $closestVectorMagnitude = 999999999999999;
+                $closestVector = null;
+                foreach ($possibleVectors as $possibleVector) {
+                    if ($possibleVector->magnitude < $closestVectorMagnitude) {
+                        $closestVector = $possibleVector;
                     }
                 }
+                if (isset($closestVector)) {
+                    $destroyedAsteroidCoordinates[] = $closestVector->endCoordinates;
+                    foreach ($vectors as $key => $vector) {
+                        if ($vector->endCoordinates === $closestVector->endCoordinates) {
+                            unset($vectors[$key]);
+                            break;
+                        }
+                    }
+                }
+
             }
         }
         return $destroyedAsteroidCoordinates;

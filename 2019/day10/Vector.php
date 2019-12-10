@@ -10,6 +10,7 @@ class Vector
 {
     public float $angleFromTopClockwise;
     public Coordinates $endCoordinates;
+    public float $magnitude;
 
     public function __construct(Coordinates $startCoordinates, Coordinates $endCoordinates)
     {
@@ -17,6 +18,7 @@ class Vector
         $x = $endCoordinates->x - $startCoordinates->x;
         $this->endCoordinates = $endCoordinates;
         $this->setAngle($x, $y);
+        $this->setMagnitude($x, $y);
     }
 
     private function setAngle(int $x, int $y)
@@ -38,6 +40,9 @@ class Vector
                 $this->angleFromTopClockwise = 270 + abs($degrees);
             }
         }
+    }private function setMagnitude(int $x, int $y)
+    {
+        $this->magnitude = sqrt(($x ** 2) + ($y ** 2));
     }
 
 }

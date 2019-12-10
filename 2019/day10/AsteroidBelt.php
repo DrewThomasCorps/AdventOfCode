@@ -74,11 +74,32 @@ class AsteroidBelt
 
     private function getUniqueVectorDirections(array $vectors): array
     {
-        $directions = [];
+        $anglesFromTopClockwise = [];
         foreach ($vectors as $vector) {
-            $directions[(string)$vector->direction] = $vector->direction;
+            $anglesFromTopClockwise[(string)$vector->angleFromTopClockwise] = $vector->angleFromTopClockwise;
         }
-        return $directions;
+        return $anglesFromTopClockwise;
+    }
+
+    public function destroyAsteroidsFromCoordinates(Coordinates $coordinates): array
+    {
+        $vectors = $this->getVectorsOfAllAsteroidsFromCoordinates($coordinates);
+        sort($vectors);
+        $destroyedAsteroidCoordinates = [];
+        $possibleAngles = $this->getUniqueVectorDirections($vectors);
+        sort($possibleAngles);
+        while (count($vectors) !== 0) {
+            foreach ($possibleAngles as $angle) {
+                foreach ($vectors as $key => $vector) {
+                    if ($vector->angleFromTopClockwise === $angle) {
+                        $destroyedAsteroidCoordinates[] = $vector->endCoordinates;
+                        unset($vectors[$key]);
+                        break;
+                    }
+                }
+            }
+        }
+        return $destroyedAsteroidCoordinates;
     }
 
 

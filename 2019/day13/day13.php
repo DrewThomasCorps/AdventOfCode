@@ -15,4 +15,8 @@ $game = new ArcadeGame($program);
 $blocks = $game->getTileCount(ArcadeGame::BLOCK_TILE);
 echo "Part 1: $blocks";
 
+$input[0] = "2";
+$freeProgram = new IntcodeProgramSix($input);
+$freeGame = new ArcadeGame($freeProgram);
+echo "\nPart 2: {$freeGame->score}";
 

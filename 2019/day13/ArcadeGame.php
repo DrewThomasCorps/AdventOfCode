@@ -6,12 +6,23 @@
  * Time: 21:48
  */
 
+require_once __DIR__ . "/Screen.php";
+
+require_once __DIR__ . "/Ball.php";
+require_once __DIR__ . "/Block.php";
+require_once __DIR__ . "/EmptySpace.php";
+require_once __DIR__ . "/Paddle.php";
+require_once __DIR__ . "/Wall.php";
+
 class ArcadeGame
 {
     private IntcodeProgramSix $program;
-    private array $screen = [[self::EMPTY_TILE]];
+    public Screen $screen;
     private array $outputs;
-    public int $score;
+    private Ball $ball;
+    private Paddle $paddle;
+
+    public bool $humanPlayer = false;
 
     const EMPTY_TILE = 0;
     const WALL_TILE = 1;
@@ -22,17 +33,18 @@ class ArcadeGame
 
     public function __construct(IntcodeProgramSix $program)
     {
+        $this->screen = new Screen();
         $this->program = $program;
         $this->program->defineOutputCallback([$this, "outputCallback"]);
         $this->program->defineInputCallback([$this, "inputCallback"]);
         $this->program->execute();
     }
 
-    public function getTileCount(int $tileId)
+    public function getTileCount(string $tileType)
     {
-        return array_reduce($this->screen, function (?int $carry, $column) use ($tileId) {
-            $carry += array_reduce($column, function (?int $carry, $value) use ($tileId) {
-                $carry += ($value === $tileId ? 1 : 0);
+        return array_reduce($this->screen->screen, function (?int $carry, $column) use ($tileType) {
+            $carry += array_reduce($column, function (?int $carry, $value) use ($tileType) {
+                $carry += (get_class($value) === $tileType ? 1 : 0);
                 return $carry;
             });
             return $carry;
@@ -49,82 +61,29 @@ class ArcadeGame
 
     public function inputCallback()
     {
-        $this->printScreen();
-    }
-
-    private function printScreen()
-    {
-        echo "\n\n";
-        foreach ($this->screen as $row) {
-            foreach ($row as $column) {
-                switch ($column) {
-                    case self::EMPTY_TILE:
-                        echo "   ";
-                        break;
-                    case self::WALL_TILE:
-                        echo "///";
-                        break;
-                    case self::BLOCK_TILE:
-                        echo "[ ]";
-                        break;
-                    case self::HORIZONTAL_PADDLE_TILE:
-                        echo "___";
-                        break;
-                    case self::BALL_TILE:
-                        echo " O ";
-                        break;
-                }
-                echo " ";
-            }
-            echo "\n";
+        if ($this->humanPlayer) {
+            $this->screen->render();
+        } else {
+            $move = $this->ball->column <=> $this->paddle->column;
+            $this->program->defineNextInputs([$move]);
         }
     }
 
     private function evaluateOutput()
     {
         if ($this->outputs[count($this->outputs) - 3] === -1 && $this->outputs[count($this->outputs) - 2] === 0) {
-            $this->setScore();
+            $this->screen->score = $this->outputs[count($this->outputs) - 1];
         } else {
-            $this->addObject();
-        }
-    }
-
-    private function setScore()
-    {
-        $this->score = $this->outputs[count($this->outputs) - 1];
-        echo "\nYour score: {$this->score}";
-    }
-
-    private function addObject()
-    {
-        $column = $this->outputs[count($this->outputs) - 3];
-        $this->addColumns($column);
-        $row = $this->outputs[count($this->outputs) - 2];
-        $this->addRows($row);
-        $object = $this->outputs[count($this->outputs) - 1];
-        $this->screen[$row][$column] = $object;
-    }
-
-    private function addRows(int $rowsMax)
-    {
-        for ($row = 0; $row <= $rowsMax; $row++) {
-            if (!isset($this->screen[$row])) {
-                $this->screen[$row] = [];
-                for ($row = 0; $row < count($this->screen[$row - 1] ?? [1]); $row++) {
-                    $this->screen[$row][] = [self::EMPTY_TILE];
-                }
+            $object = $this->outputs[2];
+            if ($object === self::BALL_TILE) {
+                $this->ball = new Ball($this->outputs[1], $this->outputs[0]);
             }
-        }
-    }
-
-    private function addColumns(int $columnsMax)
-    {
-
-        foreach ($this->screen as $row) {
-            while (count($row) < $columnsMax) {
-                $row[] = self::EMPTY_TILE;
+            if ($object === self::HORIZONTAL_PADDLE_TILE) {
+                $this->paddle = new Paddle($this->outputs[1], $this->outputs[0]);
             }
+            $this->screen->addObject($this->outputs);
         }
+        $this->outputs = [];
     }
 
 

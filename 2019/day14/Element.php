@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnhandledExceptionInspection */
+
 /**
  * Created by PhpStorm.
  * User: Drew
@@ -24,115 +25,59 @@ class Element
         return $this->amountCreated - $this->amountUsed;
     }
 
-    public function synthesizeMax(): void
+    public function create(int $quantity = 1): void
     {
-        $power = 5;
-        while ($power >= 0) {
-            if (!$this->synthesize(pow(10, $power))) {
-                echo "\nHERE!";
-                $power--;
-            }
+        while (!$this->hasNeededReactants($quantity)) {
+            $this->createNeededReactants($quantity);
         }
+        $this->react($this->getReactionsRequiredToProduce($quantity));
     }
 
-    public function synthesize(int $count = 1): bool
+    private function react(int $multiple): void
     {
-        if (!$this->hasEnoughRawMaterials($count)) {
-            return false;
-        }
-        if (count($this->neededReactants) === 0) {
-            return $this->getQuantityLeft() >= $count;
-        }
-        if (!$this->createNeededReactants($count)) {
-            return false;
-        }
-        return $this->react($count);
-    }
-
-    private function react(int $multiple = 1): bool
-    {
-        foreach ($this->neededReactants as $neededReactant) {
-            $neededReactant->element->amountUsed += ($neededReactant->moles * $multiple);
-            if ($neededReactant->element->getQuantityLeft() < 0) {
-                return false;
+        foreach ($this->neededReactants as $reactant) {
+            $reactant->element->amountUsed += ($reactant->moles * $multiple);
+            if ($reactant->element->getQuantityLeft() < 0) {
+                throw new Exception("Error: " . $reactant->element->name . " ran out of units");
             }
         }
         $this->amountCreated += ($this->reactionCreates * $multiple);
-        return true;
     }
 
-    private function createNeededReactants(int $multiple = 1): bool
+    private function createNeededReactants(int $quantity): void
     {
-        if (count($this->neededReactants) === 0) {
-            return $this->getQuantityLeft() >= $multiple;
+        foreach ($this->neededReactants as $reactant) {
+            $this->createNeededReactant($reactant, $quantity);
         }
-        while (!$this->hasNeededReactants($multiple)) {
-            foreach ($this->neededReactants as $reactant) {
-                if (!$this->createReactant($reactant, $multiple)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
-    private function hasNeededReactants(int $multiple = 1): bool
+    private function getReactionsRequiredToProduce(int $quantity): int
     {
-        foreach ($this->neededReactants as $neededReactant) {
-            if ($neededReactant->element->getQuantityLeft() < ($neededReactant->moles * $multiple)) {
+        return ceil($quantity / $this->reactionCreates);
+    }
+
+    private function createNeededReactant(Moles $reactant, int $productQuantity): void
+    {
+        $reactions = $this->getReactionsRequiredToProduce($productQuantity);
+        $reactantNeeded = $reactions * $reactant->moles;
+        $reactantToProduce = $reactantNeeded - $reactant->element->getQuantityLeft();
+        if ($reactantToProduce > 0 && count($reactant->element->neededReactants) === 0) {
+            throw new Exception("Error: cannot create base element");
+        } elseif ($reactantToProduce > 0) {
+            $reactant->element->create($reactantToProduce);
+        }
+    }
+
+    private function hasNeededReactants(int $quantity)
+    {
+        $reactions = $this->getReactionsRequiredToProduce($quantity);
+        foreach ($this->neededReactants as $reactant) {
+            $reactantNeeded = $reactions * $reactant->moles;
+            if ($reactantNeeded > $reactant->element->getQuantityLeft()) {
                 return false;
             }
         }
         return true;
-    }
-
-    private function createReactant(Moles $reactant, int $count = 1): bool
-    {
-        $reactants = $this->getReactantsRequiredToCreate($reactant, $count);
-        if ($reactants > 0) {
-            return $reactant->element->synthesize(ceil($reactants / $reactant->element->reactionCreates));
-        } else {
-            return true;
-        }
-    }
-
-    private function hasEnoughRawMaterials(int $count = 1): bool
-    {
-        $totalRawMaterials = $this->getRawMaterials();
-        $rawMaterialsNeeded = $this->getNeededRawMaterials(0, $count);
-        return $totalRawMaterials >= $rawMaterialsNeeded;
-    }
-
-    private function getRawMaterials(): int
-    {
-        $element = $this;
-        while (count($element->neededReactants) !== 0) {
-            $element = $element->neededReactants[0]->element;
-        }
-        return $element->getQuantityLeft();
-    }
-
-    public function getNeededRawMaterials(int $carry = 0, int $count = 1): int
-    {
-        foreach ($this->neededReactants as $reactant) {
-            $reactants = $this->getReactantsRequiredToCreate($reactant, $count);
-            if (count($reactant->element->neededReactants) === 0) {
-                $carry += $reactants;
-            } else {
-                $carry += $reactant->element->getNeededRawMaterials($carry, $reactants);
-            }
-        }
-        return $carry;
-    }
-
-    private function getReactantsRequiredToCreate(Moles $reactant, $count = 1): int
-    {
-        $productNeeded = $count - $this->getQuantityLeft();
-        if ($productNeeded <= 0) {
-            return 0;
-        }
-        $productReactions = ceil($productNeeded / $this->reactionCreates);
-        return $productReactions * $reactant->moles;
     }
 
 

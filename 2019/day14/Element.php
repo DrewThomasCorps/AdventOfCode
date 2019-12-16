@@ -6,7 +6,6 @@
  * Date: 2019-12-14
  * Time: 16:17
  */
-
 class Element
 {
     public string $name;
@@ -31,6 +30,25 @@ class Element
             $this->createNeededReactants($quantity);
         }
         $this->react($this->getReactionsRequiredToProduce($quantity));
+    }
+
+    public function createMax(): void
+    {
+        $power = 9;
+        while ($power >= 0) {
+            if ($this->hasEnoughBaseElementToCreate(10 ** $power)) {
+                $this->create(10 ** $power);
+            } else {
+                $power--;
+            }
+        }
+        while (true) {
+            try {
+                $this->create();
+            } catch (Exception $exception) {
+                break;
+            }
+        }
     }
 
     private function react(int $multiple): void
@@ -68,7 +86,7 @@ class Element
         }
     }
 
-    private function hasNeededReactants(int $quantity)
+    private function hasNeededReactants(int $quantity): bool
     {
         $reactions = $this->getReactionsRequiredToProduce($quantity);
         foreach ($this->neededReactants as $reactant) {
@@ -78,6 +96,39 @@ class Element
             }
         }
         return true;
+    }
+
+    private function hasEnoughBaseElementToCreate(int $quantity): bool
+    {
+        $baseElementLeft = $this->getBaseElementLeft();
+        $baseElementNeeded = $this->getBaseElementNeededToCreate($quantity);
+        return $baseElementLeft >= $baseElementNeeded;
+    }
+
+    private function getBaseElementLeft(): int
+    {
+        $element = $this;
+        while (count($element->neededReactants) !== 0) {
+            $element = $element->neededReactants[0]->element;
+        }
+        return $element->getQuantityLeft();
+    }
+
+    private function getBaseElementNeededToCreate(int $quantity): int
+    {
+        $reactions = $this->getReactionsRequiredToProduce($quantity);
+        $baseElementNeeded = 0;
+        foreach ($this->neededReactants as $reactant) {
+            $reactantNeeded = $reactions * $reactant->moles;
+            if (count($reactant->element->neededReactants) === 0) {
+                return $reactantNeeded;
+            }
+            $reactantToProduce = $reactantNeeded - $reactant->element->getQuantityLeft();
+            if ($reactantToProduce > 0) {
+                $baseElementNeeded += $reactant->element->getBaseElementNeededToCreate($reactantNeeded);
+            }
+        }
+        return $baseElementNeeded;
     }
 
 

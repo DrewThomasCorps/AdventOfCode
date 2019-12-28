@@ -23,21 +23,30 @@ for ($i = 0; $i < 8; $i++) {
     echo $finalSignal[$i];
 }
 
+ini_set('memory_limit','1000M');
+
 $realInput = [];
 for ($i = 0; $i < 10000; $i++) {
     array_push($realInput, ...$input);
 }
-echo "HERE";
-$pattern = new PhasePattern([0, 1, 0, -1], count($realInput));
-$signal = new Signal($realInput, $pattern);
-echo "\nTest";
-for ($i = 0; $i < 100; $i++) {
-    $signal = $signal->getOutputSignal();
-    echo "\n$i";
+$offset = 0;
+for ($i = 0; $i < 7; $i++) {
+    $offset += $input[$i] * pow(10, 6 - $i);
 }
-$finalSignal = $signal->inputSignal;
-echo "Part 1: ";
-for ($i = 0; $i < 8; $i++) {
-    echo $finalSignal[$i];
+if ($offset > count($realInput) / 2) {
+    $signal = array_slice($realInput, $offset);
+    for ($i = 0; $i < 100; $i++) {
+        $nextSignal = [];
+        $total = array_sum($signal);
+        for ($position = 0; $position < count($signal); $position++) {
+            $nextSignal[] = ($total % 10);
+            $total -= $signal[$position];
+        }
+        $signal = $nextSignal;
+    }
+    echo "\nPart 2: ";
+    for ($i = 0; $i < 8; $i++) {
+        echo $signal[$i];
+    }
 }
 
